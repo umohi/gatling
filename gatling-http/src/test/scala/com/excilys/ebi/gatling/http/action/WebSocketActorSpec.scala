@@ -44,7 +44,7 @@ class WebSocketActorSpec extends Specification with AllExpectations with Mockito
   step {
     // initialize logging to avoid substitute logger error messages
     LoggerFactory.getLogger(classOf[WebSocketActorSpec])
-    // set up configuration to avoid NPEs contructing actors
+    // set up configuration to avoid NPEs constructing actors
     GatlingConfiguration.setUp()
     success
   }
