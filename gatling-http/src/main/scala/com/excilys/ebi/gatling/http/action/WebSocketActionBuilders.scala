@@ -23,20 +23,20 @@ import com.excilys.ebi.gatling.core.action._
 import com.excilys.ebi.gatling.core.config.ProtocolConfigurationRegistry
 import com.excilys.ebi.gatling.http.util.{RequestLogger, WebSocketClient}
 
-class OpenWebSocketActionBuilder(val attributeName: String, val actionName: EvaluatableString, val fUrl: EvaluatableString, val webSocketClient: WebSocketClient, val requestLogger: RequestLogger, val next: ActorRef = null) extends ActionBuilder {
-  def withNext(next: ActorRef): ActionBuilder = new OpenWebSocketActionBuilder(attributeName, actionName, fUrl, webSocketClient, requestLogger, next)
+class OpenWebSocketActionBuilder(val actionName: EvaluatableString, val attributeName: String, val fUrl: EvaluatableString, val webSocketClient: WebSocketClient, val requestLogger: RequestLogger, val next: ActorRef = null) extends ActionBuilder {
+  def withNext(next: ActorRef): ActionBuilder = new OpenWebSocketActionBuilder(actionName, attributeName, fUrl, webSocketClient, requestLogger, next)
 
-  def build(registry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(new OpenWebSocketAction(attributeName, actionName, fUrl, webSocketClient, requestLogger, next, registry)))
+  def build(registry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(new OpenWebSocketAction(actionName, attributeName, fUrl, webSocketClient, requestLogger, next, registry)))
 }
 
-class SendWebSocketMessageActionBuilder(val attributeName: String, val actionName: EvaluatableString, val fMessage: EvaluatableString, val next: ActorRef = null) extends ActionBuilder {
-  def withNext(next: ActorRef): ActionBuilder = new SendWebSocketMessageActionBuilder(attributeName, actionName, fMessage, next)
+class SendWebSocketMessageActionBuilder(val actionName: EvaluatableString, val attributeName: String, val fMessage: EvaluatableString, val next: ActorRef = null) extends ActionBuilder {
+  def withNext(next: ActorRef): ActionBuilder = new SendWebSocketMessageActionBuilder(actionName, attributeName, fMessage, next)
 
-  def build(registry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(new SendWebSocketMessageAction(attributeName, actionName, fMessage, next, registry)))
+  def build(registry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(new SendWebSocketMessageAction(actionName, attributeName, fMessage, next, registry)))
 }
 
-class CloseWebSocketActionBuilder(val attributeName: String, val actionName: EvaluatableString, val next: ActorRef = null) extends ActionBuilder {
-  def withNext(next: ActorRef): ActionBuilder = new CloseWebSocketActionBuilder(attributeName, actionName, next)
+class CloseWebSocketActionBuilder(val actionName: EvaluatableString, val attributeName: String, val next: ActorRef = null) extends ActionBuilder {
+  def withNext(next: ActorRef): ActionBuilder = new CloseWebSocketActionBuilder(actionName, attributeName, next)
 
-  def build(registry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(new CloseWebSocketAction(attributeName, actionName, next, registry)))
+  def build(registry: ProtocolConfigurationRegistry): ActorRef = system.actorOf(Props(new CloseWebSocketAction(actionName, attributeName, next, registry)))
 }

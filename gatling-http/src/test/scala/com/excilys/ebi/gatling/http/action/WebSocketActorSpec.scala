@@ -155,8 +155,8 @@ class WebSocketActorSpec extends Specification with AllExpectations with Mockito
 
     def open(webSocketClient: WebSocketClient) {
       next = TestActorRef[DummyAction](Props(new DummyAction))(system)
-      val action = websocket("testAttributeName")
-        .open("ws://dummy/", "testRequestName")(webSocketClient, requestLogger)
+      val action = websocket("testRequestName")
+        .open("ws://dummy/", "testAttributeName")(webSocketClient, requestLogger)
         .withNext(next).asInstanceOf[OpenWebSocketActionBuilder]
         .build(DummyProtocolConfigurationRegistry)
 
@@ -181,8 +181,8 @@ class WebSocketActorSpec extends Specification with AllExpectations with Mockito
     def sendMessage(message: String) {
       val session = next.underlyingActor.session.get
       next = TestActorRef[DummyAction](Props(new DummyAction))(system)
-      val action = websocket("testAttributeName")
-        .sendMessage(message)
+      val action = websocket("testRequestName")
+        .sendMessage(message, "testAttributeName")
         .withNext(next).asInstanceOf[SendWebSocketMessageActionBuilder]
         .build(DummyProtocolConfigurationRegistry)
 
@@ -192,8 +192,8 @@ class WebSocketActorSpec extends Specification with AllExpectations with Mockito
     def close() {
       val session = next.underlyingActor.session.get
       next = TestActorRef[DummyAction](Props(new DummyAction))(system)
-      val action = websocket("testAttributeName")
-        .close()
+      val action = websocket("testRequestName")
+        .close("testAttributeName")
         .withNext(next).asInstanceOf[CloseWebSocketActionBuilder]
         .build(DummyProtocolConfigurationRegistry)
 

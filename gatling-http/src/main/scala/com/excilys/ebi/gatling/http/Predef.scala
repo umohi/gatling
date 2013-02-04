@@ -62,7 +62,7 @@ object Predef {
 	val responseContentLength = (response: ExtendedResponse) => List(response.getHeader(Headers.Names.CONTENT_LENGTH))
 	val responseUri = (response: ExtendedResponse) => List(response.getUri.toString)
 
-  def websocket(attributeName: String) = WebSocketBaseBuilder.websocket(attributeName)
+  def websocket(actionName: EvaluatableString) = WebSocketBaseBuilder.websocket(actionName)
   implicit val defaultWebSocketClient = DefaultWebSocketClient
   implicit val defaultRequestLogger = DefaultRequestLogger
 }

@@ -39,7 +39,7 @@ private[http] abstract class WebSocketAction(actionName: EvaluatableString) exte
   }
 }
 
-private[http] class OpenWebSocketAction(attributeName: String, actionName: EvaluatableString, fUrl: EvaluatableString, webSocketClient: WebSocketClient, requestLogger: RequestLogger, val next: ActorRef, registry: ProtocolConfigurationRegistry) extends WebSocketAction(actionName) {
+private[http] class OpenWebSocketAction(actionName: EvaluatableString, attributeName: String, fUrl: EvaluatableString, webSocketClient: WebSocketClient, requestLogger: RequestLogger, val next: ActorRef, registry: ProtocolConfigurationRegistry) extends WebSocketAction(actionName) {
   def execute(session: Session) {
     val rActionName = resolvedActionName(session)
 
@@ -90,13 +90,13 @@ private[http] class OpenWebSocketAction(attributeName: String, actionName: Evalu
   }
 }
 
-private[http] class SendWebSocketMessageAction(attributeName: String, actionName: EvaluatableString, fMessage: EvaluatableString, val next: ActorRef, registry: ProtocolConfigurationRegistry) extends WebSocketAction(actionName) {
+private[http] class SendWebSocketMessageAction(actionName: EvaluatableString, attributeName: String, fMessage: EvaluatableString, val next: ActorRef, registry: ProtocolConfigurationRegistry) extends WebSocketAction(actionName) {
   def execute(session: Session) {
     session.getAttributeAsOption[(ActorRef, _)](attributeName).foreach(_._1 ! SendMessage(resolvedActionName(session), fMessage(session), next, session))
   }
 }
 
-private[http] class CloseWebSocketAction(attributeName: String, actionName: EvaluatableString, val next: ActorRef, registry: ProtocolConfigurationRegistry) extends WebSocketAction(actionName) {
+private[http] class CloseWebSocketAction(actionName: EvaluatableString, attributeName: String, val next: ActorRef, registry: ProtocolConfigurationRegistry) extends WebSocketAction(actionName) {
   def execute(session: Session) {
     val rActionName = resolvedActionName(session)
     info("Closing websocket '" + attributeName + "': Scenario '" + session.scenarioName + "', UserId #" + session.userId)

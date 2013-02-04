@@ -20,31 +20,36 @@ import com.excilys.ebi.gatling.core.session._
 import com.excilys.ebi.gatling.http.action._
 import com.excilys.ebi.gatling.http.util.{RequestLogger, WebSocketClient}
 
-class WebSocketBaseBuilder(val attributeName: String) {
+/**
+ * @param actionName The action name in the log
+ */
+class WebSocketBaseBuilder(val actionName: EvaluatableString) {
+  private val DEFAULT_ATTRIBUTE_NAME = "com.excilys.ebi.gatling.http.request.builder.WebSocket"
+
   /**
    * Opens a web socket and stores it in the session.
    *
    * @param fUrl The socket URL
-   * @param actionName The action name in the log
+   * @param attributeName The name of the session attribute used to store the socket
    */
-  def open(fUrl: EvaluatableString, actionName: EvaluatableString = (_ => attributeName))(implicit webSocketClient: WebSocketClient, requestLogger: RequestLogger) = new OpenWebSocketActionBuilder(attributeName, actionName, fUrl, webSocketClient, requestLogger)
+  def open(fUrl: EvaluatableString, attributeName: String = DEFAULT_ATTRIBUTE_NAME)(implicit webSocketClient: WebSocketClient, requestLogger: RequestLogger) = new OpenWebSocketActionBuilder(actionName, attributeName, fUrl, webSocketClient, requestLogger)
 
   /**
    * Sends a message on the given socket.
    *
    * @param fMessage The message
-   * @param actionName The action name in the log
+   * @param attributeName The name of the session attribute storing the socket
    */
-  def sendMessage(fMessage: EvaluatableString, actionName: EvaluatableString = (_ => attributeName)) = new SendWebSocketMessageActionBuilder(attributeName, actionName, fMessage)
+  def sendMessage(fMessage: EvaluatableString, attributeName: String = DEFAULT_ATTRIBUTE_NAME) = new SendWebSocketMessageActionBuilder(actionName, attributeName, fMessage)
 
   /**
    * Closes a web socket.
    *
-   * @param actionName The action name in the log
+   * @param attributeName The name of the session attribute storing the socket
    */
-  def close(actionName: EvaluatableString = (_ => attributeName)) = new CloseWebSocketActionBuilder(attributeName, actionName)
+  def close(attributeName: String = DEFAULT_ATTRIBUTE_NAME) = new CloseWebSocketActionBuilder(actionName, attributeName)
 }
 
 object WebSocketBaseBuilder {
-  def websocket(attributeName: String) = new WebSocketBaseBuilder(attributeName)
+  def websocket(attributeName: EvaluatableString) = new WebSocketBaseBuilder(attributeName)
 }
