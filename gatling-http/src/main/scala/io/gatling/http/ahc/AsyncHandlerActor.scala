@@ -62,33 +62,17 @@ class AsyncHandlerActor(protocol: HttpProtocol) extends BaseActor {
 	}
 
 	def receive = {
-		case state @ AsyncHandlerActorState(session, _, _, _, _, _, _) =>
+		case state @ AsyncHandlerActorState(session, _, _, _, _, _) =>
 			if (client == null)
 				client = if (protocol.shareClient) HttpClient.default else HttpClient.newClient(session)
 			sendHttpRequest(state)
 
-		case OnHeaderWriteCompleted(nanos) if !crashed =>
-			responseBuilder.updateLastByteSent(nanos)
+		case OnCompleted(response) if !crashed =>
+			processResponse(response)
 
-		case OnContentWriteCompleted(nanos) if !crashed =>
-			responseBuilder.updateLastByteSent(nanos)
-
-		case OnStatusReceived(status, nanos) if !crashed =>
-			responseBuilder.updateFirstByteReceived(nanos).accumulate(status)
-
-		case OnHeadersReceived(headers) if !crashed =>
-			responseBuilder.accumulate(headers)
-
-		case OnBodyPartReceived(bodyPart) if !crashed =>
-			responseBuilder.accumulate(bodyPart)
-
-		case OnCompleted(nanos) if !crashed =>
-			responseBuilder.updateLastByteReceived(nanos)
-			processResponse(responseBuilder.build)
-
-		case OnThrowable(errorMessage, nanos) =>
+		case OnThrowable(response, errorMessage) =>
 			crashed = true
-			ko(state.session, responseBuilder.updateLastByteReceived(nanos).build, errorMessage)
+			ko(state.session, response, errorMessage)
 
 		case ReceiveTimeout =>
 			crashed = true
@@ -102,7 +86,7 @@ class AsyncHandlerActor(protocol: HttpProtocol) extends BaseActor {
 		this.state = state
 		crashed = false
 		responseBuilder = state.responseBuilderFactory(state.request)
-		val ahcHandler = state.handlerFactory(state.requestName, self)
+		val ahcHandler = new AsyncHandler(state.requestName, self, responseBuilder)
 		client.executeRequest(state.request, ahcHandler)
 	}
 
@@ -207,7 +191,7 @@ class AsyncHandlerActor(protocol: HttpProtocol) extends BaseActor {
 				case _ => state.requestName + " Redirect 1"
 			}
 
-			sendHttpRequest(AsyncHandlerActorState(sessionWithUpdatedCookies, newRequest, newRequestName, state.checks, state.handlerFactory, state.responseBuilderFactory, state.next))
+			sendHttpRequest(AsyncHandlerActorState(sessionWithUpdatedCookies, newRequest, newRequestName, state.checks, state.responseBuilderFactory, state.next))
 		}
 
 		def checkAndProceed(sessionWithUpdatedCookies: Session) {

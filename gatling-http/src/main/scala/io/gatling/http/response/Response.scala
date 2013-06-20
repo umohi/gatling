@@ -15,6 +15,9 @@
  */
 package io.gatling.http.response
 
+import java.io.ByteArrayInputStream
+import java.nio.ByteBuffer
+
 import scala.collection.JavaConversions.asScalaBuffer
 
 import com.ning.http.client.{ Request, Response => AHCResponse }
@@ -42,7 +45,8 @@ case class HttpResponse(
 	firstByteSent: Long,
 	lastByteSent: Long,
 	firstByteReceived: Long,
-	lastByteReceived: Long) extends Response {
+	lastByteReceived: Long,
+	bytes: Array[Byte]) extends Response {
 
 	def checksum(algorithm: String) = checksums.get(algorithm)
 	def reponseTimeInMillis = lastByteReceived - firstByteSent
@@ -51,16 +55,17 @@ case class HttpResponse(
 	def getHeadersSafe(name: String) = Option(ahcResponse.getOrElse(throw new IllegalStateException("Response was not built")).getHeaders(name).toSeq).getOrElse(Nil)
 
 	override def toString = ahcResponse.toString
-	def receivedResponse = ahcResponse.getOrElse(throw new IllegalStateException("Response was not built"))
+
+	private def receivedResponse = ahcResponse.getOrElse(throw new IllegalStateException("Response was not built"))
 	def getStatusCode = receivedResponse.getStatusCode
 	def getStatusText = receivedResponse.getStatusText
-	def getResponseBodyAsBytes = receivedResponse.getResponseBodyAsBytes
-	def getResponseBodyAsStream = receivedResponse.getResponseBodyAsStream
-	def getResponseBodyAsByteBuffer = receivedResponse.getResponseBodyAsByteBuffer
-	def getResponseBodyExcerpt(maxLength: Int, charset: String) = receivedResponse.getResponseBodyExcerpt(maxLength, charset)
-	def getResponseBody(charset: String) = receivedResponse.getResponseBody(charset)
-	def getResponseBodyExcerpt(maxLength: Int) = receivedResponse.getResponseBodyExcerpt(maxLength)
-	def getResponseBody = receivedResponse.getResponseBody
+	def getResponseBodyAsBytes = bytes
+	def getResponseBodyAsStream = new ByteArrayInputStream(bytes)
+	def getResponseBodyAsByteBuffer = ByteBuffer.wrap(bytes)
+	def getResponseBodyExcerpt(maxLength: Int, charset: String) = throw new UnsupportedOperationException
+	def getResponseBody(charset: String) = new String(bytes, charset)
+	def getResponseBodyExcerpt(maxLength: Int) = throw new UnsupportedOperationException
+	def getResponseBody = new String(bytes)
 	def getUri = receivedResponse.getUri
 	def getContentType = receivedResponse.getContentType
 	def getHeader(name: String) = receivedResponse.getHeader(name)

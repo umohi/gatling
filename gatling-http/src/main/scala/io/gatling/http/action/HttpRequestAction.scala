@@ -60,7 +60,6 @@ class HttpRequestAction(
 	responseProcessor: Option[ResponseProcessor],
 	protocol: HttpProtocol) extends Interruptable {
 
-	val handlerFactory = AsyncHandler.newHandlerFactory(checks, protocol)
 	val responseBuilderFactory = ResponseBuilder.newResponseBuilder(checks, responseProcessor, protocol)
 
 	def execute(session: Session) {
@@ -82,7 +81,7 @@ class HttpRequestAction(
 							(newSession.set(AsyncHandlerActor.httpActorAttributeName, httpActor), httpActor)
 						}
 
-				httpActor ! AsyncHandlerActorState(sessionWithActor, request, resolvedRequestName, checks, handlerFactory, responseBuilderFactory, next)
+				httpActor ! AsyncHandlerActorState(sessionWithActor, request, resolvedRequestName, checks, responseBuilderFactory, next)
 			}
 		}
 
